@@ -1,0 +1,1 @@
+python fix_align.py preprocessed/vpb/TextGrid/speaker1_1 preprocessed/vpb/TextGrid/speaker1/

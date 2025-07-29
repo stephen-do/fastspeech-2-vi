@@ -1,0 +1,1 @@
+mfa train --clean -t ./temp ./raw_data/vpb ./lexicon/vi-new-lexicon.txt ./mfa/vi_new_mfa.zip
