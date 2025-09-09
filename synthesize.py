@@ -208,44 +208,38 @@ if __name__ == "__main__":
         assert args.source is not None and args.text is None
     if args.mode == "single":
         assert args.source is None and args.text is not None
-    texts = args.text.split('.')
-    for t in texts:
-        # Read Config
-        preprocess_config = yaml.load(
+    preprocess_config = yaml.load(
             open(args.preprocess_config, "r"), Loader=yaml.FullLoader
-        )
-        model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
-        train_config = yaml.load(open(args.train_config, "r"), Loader=yaml.FullLoader)
-        configs = (preprocess_config, model_config, train_config)
+    )
+    model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
+    train_config = yaml.load(open(args.train_config, "r"), Loader=yaml.FullLoader)
+    configs = (preprocess_config, model_config, train_config)
 
         # Get model
-        model = get_model(args, configs, device, train=False)
+    model = get_model(args, configs, device, train=False)
 
         # Load vocoder
-        vocoder = get_vocoder(model_config, device)
-
+    vocoder = get_vocoder(model_config, device)
+    # texts = args.text.split('.')
+    # for t in texts:
+        # Read Config
         # Preprocess texts
-        if args.mode == "batch":
+    if args.mode == "batch":
             # Get dataset
-            dataset = TextDataset(args.source, preprocess_config)
-            batchs = DataLoader(
+        dataset = TextDataset(args.source, preprocess_config)
+        batchs = DataLoader(
                 dataset,
                 batch_size=8,
                 collate_fn=dataset.collate_fn,
             )
-        if args.mode == "single":
-            ids = raw_texts = [t[:100]]
-            speakers = np.array([args.speaker_id])
-            if preprocess_config["preprocessing"]["text"]["language"] == "en":
-                texts = np.array([preprocess_english(args.text, preprocess_config)])
-            elif preprocess_config["preprocessing"]["text"]["language"] == "zh":
-                texts = np.array([preprocess_mandarin(args.text, preprocess_config)])
-            elif preprocess_config["preprocessing"]["text"]["language"] == "vi":
-                texts = np.array([preprocess_vietnamese(t, preprocess_config)])
-            text_lens = np.array([len(texts[0])])
-            batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens))]
+    if args.mode == "single":
+        ids = raw_texts = [args.text[:100]]
+        speakers = np.array([args.speaker_id])
+        texts = np.array([preprocess_vietnamese(args.text, preprocess_config)])
+        text_lens = np.array([len(texts[0])])
+        batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens))]
 
-        control_values = args.pitch_control, args.energy_control, args.duration_control
+    control_values = args.pitch_control, args.energy_control, args.duration_control
         
 
-        synthesize(model, args.restore_step, configs, vocoder, batchs, control_values)
+    synthesize(model, args.restore_step, configs, vocoder, batchs, control_values)

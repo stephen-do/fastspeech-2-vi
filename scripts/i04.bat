@@ -1,1 +1,1 @@
-python fix_align.py preprocessed/vpb/TextGrid/speaker1_1 preprocessed/vpb/TextGrid/speaker1/
+python fix_align.py preprocessed6/speaker1/TextGrid/speaker1_1 preprocessed6/speaker1/TextGrid/speaker1/

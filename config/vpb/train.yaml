@@ -1,9 +1,9 @@
 path:
-  ckpt_path: "./output3/ckpt/vpb"
-  log_path: "./output3/log/vpb"
-  result_path: "./output3/result/vpb"
+  ckpt_path: "./output6/ckpt/vpb"
+  log_path: "./output6/log/vpb"
+  result_path: "./output6/result/vpb"
 optimizer:
-  batch_size: 16
+  batch_size: 32
   betas: [0.9, 0.98]
   eps: 0.000000001
   weight_decay: 0.0

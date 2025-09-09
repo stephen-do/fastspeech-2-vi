@@ -29,7 +29,6 @@ def preprocess_text(text, lang, config):
     print("Phones:", phoneme_seq)
     return np.array(text_to_sequence(phoneme_seq, config["preprocessing"]["text"]["text_cleaners"]))
 
-
 def infer(session, seq, p_control, e_control, d_control):
     texts = np.array([seq]).astype(np.int64)
     src_lens = np.array([len(seq)]).astype(np.int64)

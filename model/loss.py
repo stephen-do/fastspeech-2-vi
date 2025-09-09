@@ -1,20 +1,48 @@
 import torch
 import torch.nn as nn
-
+from pytorch_msssim import ssim
 
 class FastSpeech2Loss(nn.Module):
     """ FastSpeech2 Loss """
 
     def __init__(self, preprocess_config, model_config):
         super(FastSpeech2Loss, self).__init__()
-        self.pitch_feature_level = preprocess_config["preprocessing"]["pitch"][
-            "feature"
-        ]
-        self.energy_feature_level = preprocess_config["preprocessing"]["energy"][
-            "feature"
-        ]
+        self.pitch_feature_level = preprocess_config["preprocessing"]["pitch"]["feature"]
+        self.energy_feature_level = preprocess_config["preprocessing"]["energy"]["feature"]
         self.mse_loss = nn.MSELoss()
         self.mae_loss = nn.L1Loss()
+
+        # Hệ số alpha: 0.9 MAE + 0.1 SSIM
+        self.alpha = 0.6
+
+    def compute_mel_loss_with_ssim(self, pred, target, mask):
+        """
+        Kết hợp MAE và SSIM loss
+        Input shape: [B, T, D], mask shape: [B, T]
+        """
+
+        # L1 Loss (MAE)
+        l1_loss = self.mae_loss(pred.masked_select(mask.unsqueeze(-1)), target.masked_select(mask.unsqueeze(-1)))
+
+        # Chuẩn hóa về [0, 1] để dùng SSIM
+        pred = pred.detach()  # Không ảnh hưởng gradient
+        target = target.detach()
+
+        pred_min, pred_max = pred.min(), pred.max()
+        target_min, target_max = target.min(), target.max()
+
+        pred_norm = (pred - pred_min) / (pred_max - pred_min + 1e-5)
+        target_norm = (target - target_min) / (target_max - target_min + 1e-5)
+
+        # Reshape [B, T, D] → [B, 1, D, T]
+        pred_img = pred_norm.transpose(1, 2).unsqueeze(1)
+        target_img = target_norm.transpose(1, 2).unsqueeze(1)
+
+        # SSIM loss
+        ssim_val = ssim(pred_img, target_img, data_range=1.0, size_average=True)
+        ssim_loss = 1 - ssim_val
+
+        return self.alpha * l1_loss + (1 - self.alpha) * ssim_loss
 
     def forward(self, inputs, predictions):
         (
@@ -65,22 +93,15 @@ class FastSpeech2Loss(nn.Module):
         log_duration_predictions = log_duration_predictions.masked_select(src_masks)
         log_duration_targets = log_duration_targets.masked_select(src_masks)
 
-        mel_predictions = mel_predictions.masked_select(mel_masks.unsqueeze(-1))
-        postnet_mel_predictions = postnet_mel_predictions.masked_select(
-            mel_masks.unsqueeze(-1)
-        )
-        mel_targets = mel_targets.masked_select(mel_masks.unsqueeze(-1))
-
-        mel_loss = self.mae_loss(mel_predictions.float(), mel_targets.float())
-        postnet_mel_loss = self.mae_loss(postnet_mel_predictions.float(), mel_targets.float())
+        # Tính loss kết hợp MAE + SSIM
+        mel_loss = self.compute_mel_loss_with_ssim(mel_predictions.float(), mel_targets.float(), mel_masks)
+        postnet_mel_loss = self.compute_mel_loss_with_ssim(postnet_mel_predictions.float(), mel_targets.float(), mel_masks)
 
         pitch_loss = self.mse_loss(pitch_predictions.float(), pitch_targets.float())
         energy_loss = self.mse_loss(energy_predictions.float(), energy_targets.float())
         duration_loss = self.mse_loss(log_duration_predictions.float(), log_duration_targets.float())
 
-        total_loss = (
-            mel_loss + postnet_mel_loss + duration_loss + pitch_loss + energy_loss
-        )
+        total_loss = mel_loss + postnet_mel_loss + duration_loss + pitch_loss + energy_loss
 
         return (
             total_loss,

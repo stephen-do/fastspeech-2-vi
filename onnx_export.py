@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # Define dynamic axes
     dynamic_axes = {
         "speakers": {0: "batch_size"},
-        "texts": {0: "batch_size", 1: "text_lens"},
+        "texts": {0: "batch_size", 1: "text_lens"},   # batch, seq_len
         "src_lens": {0: "batch_size"},
         "max_src_len": {},
         "output": {0: "batch_size", 1: "mel_len"},
