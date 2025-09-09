@@ -74,10 +74,12 @@ class Preprocessor:
                 tg_path = os.path.join(
                     self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
                 )
+                # print(tg_path)
                 # print("trace 0", tg_path)
                 if os.path.exists(tg_path):
                     #print("trace 1", tg_path)
                     ret = self.process_utterance(speaker, basename)
+                    # print(ret)
                     if ret is None:
                         continue
                     else:

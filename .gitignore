@@ -115,12 +115,21 @@ raw_data/
 output/
 output2/
 output3/
+output4/
+output5/
+output6/
 *.npy
 TextGrid/
 input/
 #  hifigan/*.pth.tar
-
+evaluate_audio/
 preprocessed_data/
 preprocessed/
+preprocessed4/
+preprocessed5/
 temp/
 *.onnx
+evaluation/
+onnx/
+output*
+preprocessed*

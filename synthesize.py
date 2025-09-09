@@ -30,61 +30,6 @@ def read_lexicon(lex_path):
     return lexicon
 
 
-def preprocess_english(text, preprocess_config):
-    text = text.rstrip(punctuation)
-    lexicon = read_lexicon(preprocess_config["path"]["lexicon_path"])
-
-    g2p = G2p()
-    phones = []
-    words = re.split(r"([,;.\-\?\!\s+])", text)
-    for w in words:
-        if w.lower() in lexicon:
-            phones += lexicon[w.lower()]
-        else:
-            phones += list(filter(lambda p: p != " ", g2p(w)))
-    phones = "{" + "}{".join(phones) + "}"
-    phones = re.sub(r"\{[^\w\s]?\}", "{sp}", phones)
-    phones = phones.replace("}{", " ")
-
-    print("Raw Text Sequence: {}".format(text))
-    print("Phoneme Sequence: {}".format(phones))
-    sequence = np.array(
-        text_to_sequence(
-            phones, preprocess_config["preprocessing"]["text"]["text_cleaners"]
-        )
-    )
-
-    return np.array(sequence)
-
-
-def preprocess_mandarin(text, preprocess_config):
-    lexicon = read_lexicon(preprocess_config["path"]["lexicon_path"])
-
-    phones = []
-    pinyins = [
-        p[0]
-        for p in pinyin(
-            text, style=Style.TONE3, strict=False, neutral_tone_with_five=True
-        )
-    ]
-    for p in pinyins:
-        if p in lexicon:
-            phones += lexicon[p]
-        else:
-            phones.append("sp")
-
-    phones = "{" + " ".join(phones) + "}"
-    print("Raw Text Sequence: {}".format(text))
-    print("Phoneme Sequence: {}".format(phones))
-    sequence = np.array(
-        text_to_sequence(
-            phones, preprocess_config["preprocessing"]["text"]["text_cleaners"]
-        )
-    )
-
-    return np.array(sequence)
-
-
 def preprocess_vietnamese(text, preprocess_config):
     lexicon = read_lexicon(preprocess_config["path"]["lexicon_path"])
 
@@ -119,17 +64,17 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
         batch = to_device(batch, device)
         with torch.no_grad():
             # Forward
-            import time
-            start = time.time()
+            # import time
+            # start = time.time()
             output = model(
                 *(batch[2:]),
                 p_control=pitch_control,
                 e_control=energy_control,
                 d_control=duration_control
             )
-            end = time.time()
-
-            print(f"Thời gian chạy: {end - start:.4f} giây")
+            # end = time.time()
+            # print(output[4].detach().cpu().numpy())
+            # print(f"Thời gian chạy: {end - start:.4f} giây")
 
             synth_samples(
                 batch,
@@ -208,44 +153,38 @@ if __name__ == "__main__":
         assert args.source is not None and args.text is None
     if args.mode == "single":
         assert args.source is None and args.text is not None
-    texts = args.text.split('.')
-    for t in texts:
-        # Read Config
-        preprocess_config = yaml.load(
+    preprocess_config = yaml.load(
             open(args.preprocess_config, "r"), Loader=yaml.FullLoader
-        )
-        model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
-        train_config = yaml.load(open(args.train_config, "r"), Loader=yaml.FullLoader)
-        configs = (preprocess_config, model_config, train_config)
+    )
+    model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
+    train_config = yaml.load(open(args.train_config, "r"), Loader=yaml.FullLoader)
+    configs = (preprocess_config, model_config, train_config)
 
         # Get model
-        model = get_model(args, configs, device, train=False)
+    model = get_model(args, configs, device, train=False)
 
         # Load vocoder
-        vocoder = get_vocoder(model_config, device)
-
+    vocoder = get_vocoder(model_config, device)
+    # texts = args.text.split('.')
+    # for t in texts:
+        # Read Config
         # Preprocess texts
-        if args.mode == "batch":
+    if args.mode == "batch":
             # Get dataset
-            dataset = TextDataset(args.source, preprocess_config)
-            batchs = DataLoader(
+        dataset = TextDataset(args.source, preprocess_config)
+        batchs = DataLoader(
                 dataset,
                 batch_size=8,
                 collate_fn=dataset.collate_fn,
             )
-        if args.mode == "single":
-            ids = raw_texts = [t[:100]]
-            speakers = np.array([args.speaker_id])
-            if preprocess_config["preprocessing"]["text"]["language"] == "en":
-                texts = np.array([preprocess_english(args.text, preprocess_config)])
-            elif preprocess_config["preprocessing"]["text"]["language"] == "zh":
-                texts = np.array([preprocess_mandarin(args.text, preprocess_config)])
-            elif preprocess_config["preprocessing"]["text"]["language"] == "vi":
-                texts = np.array([preprocess_vietnamese(t, preprocess_config)])
-            text_lens = np.array([len(texts[0])])
-            batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens))]
+    if args.mode == "single":
+        ids = raw_texts = [args.text[:100]]
+        speakers = np.array([args.speaker_id])
+        texts = np.array([preprocess_vietnamese(args.text, preprocess_config)])
+        text_lens = np.array([len(texts[0])])
+        batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens))]
 
-        control_values = args.pitch_control, args.energy_control, args.duration_control
+    control_values = args.pitch_control, args.energy_control, args.duration_control
         
-
-        synthesize(model, args.restore_step, configs, vocoder, batchs, control_values)
+    # for i in range(5):
+    synthesize(model, args.restore_step, configs, vocoder, batchs, control_values)

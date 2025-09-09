@@ -4,7 +4,7 @@ path:
   corpus_path: "./input/infore"
   lexicon_path: "lexicon/vi-new-lexicon.txt"
   raw_path: "./raw_data/"
-  preprocessed_path: "./preprocessed_data/speaker1"
+  preprocessed_path: "./preprocessed_hotfix/speaker1"
 
 preprocessing:
   val_size: 340

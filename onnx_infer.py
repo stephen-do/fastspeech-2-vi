@@ -29,7 +29,6 @@ def preprocess_text(text, lang, config):
     print("Phones:", phoneme_seq)
     return np.array(text_to_sequence(phoneme_seq, config["preprocessing"]["text"]["text_cleaners"]))
 
-
 def infer(session, seq, p_control, e_control, d_control):
     texts = np.array([seq]).astype(np.int64)
     src_lens = np.array([len(seq)]).astype(np.int64)
@@ -58,7 +57,7 @@ def pad_sequence(seq, max_len, pad_value):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--onnx_model", type=str, default='FastSpeech_2.onnx')
-    parser.add_argument("--text", type=str, required=True)
+    # parser.add_argument("--text", type=str, required=True)
     parser.add_argument("--speaker_id", type=int, default=0)
     parser.add_argument("--pitch_control", type=float, default=1.0)
     parser.add_argument("--energy_control", type=float, default=1.0)

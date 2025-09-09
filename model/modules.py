@@ -158,40 +158,59 @@ class VarianceAdaptor(nn.Module):
         )
 
 
+# class LengthRegulator(nn.Module):
+#     """Length Regulator"""
+
+#     def __init__(self):
+#         super(LengthRegulator, self).__init__()
+
+#     def LR(self, x, duration, max_len):
+#         output = list()
+#         mel_len = list()
+#         for batch, expand_target in zip(x, duration):
+#             expanded = self.expand(batch, expand_target)
+#             output.append(expanded)
+#             mel_len.append(expanded.shape[0])
+
+#         if max_len is not None:
+#             output = pad(output, max_len)
+#         else:
+#             output = pad(output)
+
+#         return output, torch.LongTensor(mel_len).to(device)
+
+#     def expand(self, batch, predicted):
+#         out = list()
+
+#         for i, vec in enumerate(batch):
+#             expand_size = predicted[i].item()
+#             out.append(vec.expand(max(int(expand_size), 0), -1))
+#         out = torch.cat(out, 0)
+
+#         return out
+
+#     def forward(self, x, duration, max_len):
+#         output, mel_len = self.LR(x, duration, max_len)
+#         return output, mel_len
+    
+
 class LengthRegulator(nn.Module):
-    """Length Regulator"""
-
     def __init__(self):
-        super(LengthRegulator, self).__init__()
+        super().__init__()
 
-    def LR(self, x, duration, max_len):
-        output = list()
-        mel_len = list()
-        for batch, expand_target in zip(x, duration):
-            expanded = self.expand(batch, expand_target)
-            output.append(expanded)
-            mel_len.append(expanded.shape[0])
-
-        if max_len is not None:
-            output = pad(output, max_len)
-        else:
-            output = pad(output)
-
-        return output, torch.LongTensor(mel_len).to(device)
-
-    def expand(self, batch, predicted):
-        out = list()
-
-        for i, vec in enumerate(batch):
-            expand_size = predicted[i].item()
-            out.append(vec.expand(max(int(expand_size), 0), -1))
-        out = torch.cat(out, 0)
-
-        return out
-
-    def forward(self, x, duration, max_len):
-        output, mel_len = self.LR(x, duration, max_len)
-        return output, mel_len
+    def forward(self, x: torch.Tensor, duration: torch.Tensor, max_len: int = None):
+        device = x.device
+        B, T_src, C = x.size()
+        duration = duration.long()
+        mel_lens = duration.sum(dim=1)
+        mel_time = mel_lens.max().item()
+        cumulative = torch.cumsum(duration, dim=1)  # (B, T_src)
+        mel_range = torch.arange(mel_time, device=device).unsqueeze(0).expand(B, -1)  # (B, mel_time)
+        src_idx = (mel_range.unsqueeze(1) >= cumulative.unsqueeze(2)).long().sum(dim=1)
+        src_idx = torch.clamp(src_idx, 0, T_src - 1)  # (B, mel_time)
+        gather_idx = src_idx.unsqueeze(-1).expand(-1, -1, C)
+        out = torch.gather(x, 1, gather_idx)
+        return out, mel_lens
 
 
 class VariancePredictor(nn.Module):

@@ -2,5 +2,11 @@ python synthesize.py --text "dạ vâng em thấy là mình đang có cái kho�
  --restore_step 157000 --mode single -p config/vpb/preprocess.yaml -m config/vpb/model.yaml -t config/vpb/train.yaml --speaker 1
 
 
-python synthesize.py --text "dạ em ghi nhận là từ nay đến mai thì anh cứ sắp xếp giúp em số tiền mười ba triệu một trăm tám mươi nghìn đồng thì em đã làm tròn lên rồi thì anh cứ chuyển dư dư giúp em thêm năm hoặc mười nghìn tránh trường hợp nó sẽ bị thiếu ạ" \
- --restore_step 157000 --mode single -p config/vpb/preprocess.yaml -m config/vpb/model.yaml -t config/vpb/train.yaml 
+python synthesize.py --text "em xin cảm ơn ạ" \
+ --restore_step 200000 --mode single -p config/vpb/preprocess.yaml -m config/vpb/model.yaml -t config/vpb/train.yaml 
+
+python synthesize.py --restore_step 200000 --mode batch -p config/vpb/preprocess.yaml -m config/vpb/model.yaml -t config/vpb/train.yaml --source 'preprocessed5/speaker1/val1.txt'
+
+
+ python synthesize.py --text "Chào bạn" \
+ --restore_step 200000 --mode single -p config/vpb/preprocess.yaml -m config/vpb/model.yaml -t config/vpb/train.yaml 
