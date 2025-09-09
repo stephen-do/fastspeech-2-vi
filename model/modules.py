@@ -192,45 +192,24 @@ class VarianceAdaptor(nn.Module):
 #     def forward(self, x, duration, max_len):
 #         output, mel_len = self.LR(x, duration, max_len)
 #         return output, mel_len
+    
 
 class LengthRegulator(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, x: torch.Tensor, duration: torch.Tensor, max_len: int = None):
-        """
-        x: (B, T_src, C)
-        duration: (B, T_src) - int or float
-        max_len: optional int
-        """
         device = x.device
         B, T_src, C = x.size()
         duration = duration.long()
-
-        # Tổng số frame thực tế
-        mel_lens = duration.sum(dim=1)  # (B,)
-
-        if max_len is None:
-            mel_time = mel_lens.max().item()
-        else:
-            mel_time = max_len
-            mel_lens = torch.clamp(mel_lens, max=mel_time)
-
-        # cumulative end index (exclusive)
+        mel_lens = duration.sum(dim=1)
+        mel_time = mel_lens.max().item()
         cumulative = torch.cumsum(duration, dim=1)  # (B, T_src)
-
-        # time step index [0 .. mel_time-1]
         mel_range = torch.arange(mel_time, device=device).unsqueeze(0).expand(B, -1)  # (B, mel_time)
-
-        # find src index for each mel frame
-        # src_idx = count of positions where mel_idx >= cum_end
         src_idx = (mel_range.unsqueeze(1) >= cumulative.unsqueeze(2)).long().sum(dim=1)
         src_idx = torch.clamp(src_idx, 0, T_src - 1)  # (B, mel_time)
-
-        # gather
-        gather_idx = src_idx.unsqueeze(-1).expand(-1, -1, C)  # (B, mel_time, C)
-        out = torch.gather(x, 1, gather_idx)  # (B, mel_time, C)
-
+        gather_idx = src_idx.unsqueeze(-1).expand(-1, -1, C)
+        out = torch.gather(x, 1, gather_idx)
         return out, mel_lens
 
 
