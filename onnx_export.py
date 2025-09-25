@@ -5,7 +5,7 @@ from utils.model import get_model
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=200000)
+    parser.add_argument("--restore_step", type=int, default=180000)
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Define input and output names

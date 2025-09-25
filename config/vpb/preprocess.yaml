@@ -3,11 +3,11 @@ dataset: "vpb"
 path:
   corpus_path: "./input/infore"
   lexicon_path: "lexicon/vi-new-lexicon.txt"
-  raw_path: "./raw_data/"
-  preprocessed_path: "./preprocessed_hotfix/speaker1"
+  raw_path: "./raw/"
+  preprocessed_path: "./preprocessed_zip/speaker1"
 
 preprocessing:
-  val_size: 340
+  val_size: 800
   text:
     text_cleaners: ["vietnamese_cleaners"]
     language: "vi"

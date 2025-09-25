@@ -57,11 +57,11 @@ def pad_sequence(seq, max_len, pad_value):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--onnx_model", type=str, default='FastSpeech_2.onnx')
-    # parser.add_argument("--text", type=str, required=True)
+    parser.add_argument("--text", type=str, required=True)
     parser.add_argument("--speaker_id", type=int, default=0)
     parser.add_argument("--pitch_control", type=float, default=1.0)
     parser.add_argument("--energy_control", type=float, default=1.0)
-    parser.add_argument("--duration_control", type=float, default=0.85)
+    parser.add_argument("--duration_control", type=float, default=1.0)
     args = parser.parse_args()
     preprocess_config = yaml.load(open('config/vpb/preprocess.yaml', "r"), Loader=yaml.FullLoader)
     model_config = yaml.load(open('config/vpb/model.yaml', "r"), Loader=yaml.FullLoader)

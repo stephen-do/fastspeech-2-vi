@@ -1,19 +1,19 @@
 path:
-  ckpt_path: "./output_hotfix/ckpt/vpb"
-  log_path: "./output_hotfix/log/vpb"
-  result_path: "./output_hotfix/result/vpb"
+  ckpt_path: "./output_zip/ckpt/vpb"
+  log_path: "./output_zip/log/vpb"
+  result_path: "./output_zip/result/vpb"
 optimizer:
-  batch_size: 2
+  batch_size: 16
   betas: [0.9, 0.98]
   eps: 0.000000001
   weight_decay: 0.0
   grad_clip_thresh: 1.0
   grad_acc_step: 1
-  warm_up_step: 205000
-  anneal_steps: [230000, 250000, 270000]
+  warm_up_step: 105000
+  anneal_steps: [130000, 150000, 170000]
   anneal_rate: 0.3
 step:
-  total_step: 300000
+  total_step: 200000
   log_step: 100
   synth_step: 1000
   val_step: 1000

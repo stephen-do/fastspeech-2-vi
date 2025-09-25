@@ -1,1 +1,1 @@
-mfa align -t ./temp ./raw_data/speaker1_linh_record_new ./mfa/vi-new-lexicon.dict ./mfa/vi_new_mfa.zip ./preprocessed_hotfix/speaker1/TextGrid/speaker1_linh_record_new_1
+mfa align -t ./temp ./raw/speaker1 ./mfa/vi-new-lexicon.dict ./mfa/vi_new_mfa.zip ./preprocessed_zip/speaker1/TextGrid/speaker1_1

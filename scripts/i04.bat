@@ -1,1 +1,1 @@
-python fix_align.py preprocessed_hotfix/speaker1/TextGrid/speaker1_linh_record_new_1 preprocessed_hotfix/speaker1/TextGrid/speaker1_linh_record_new/
+python fix_align.py preprocessed_zip/speaker1/TextGrid/speaker1_1 preprocessed_zip/speaker1/TextGrid/speaker1/

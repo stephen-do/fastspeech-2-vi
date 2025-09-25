@@ -32,8 +32,9 @@ def read_lexicon(lex_path):
 
 def preprocess_vietnamese(text, preprocess_config):
     lexicon = read_lexicon(preprocess_config["path"]["lexicon_path"])
-
     text = text.replace(',', ' <sp> <sp> <sp> ').replace('.', ' <sp> <sp> <sp> <sp> ').replace(';', ' <sp> <sp> <sp> ').replace('?', ' <sp> <sp> <sp> <sp> ').replace('!', ' <sp> <sp> <sp> <sp> ').replace(':', ' <sp> <sp> <sp> <sp> ')
+    # text = text.replace(',', ' ').replace('.', ' ').replace(';', ' ').replace('?', ' ').replace('!', ' ').replace(':', ' ')
+    text = text + ' <sp> <sp> <sp> <sp> <sp> <sp> <sp> <sp> '
     text = clean_vietnamese_text(text)
     phones = []
     words = re.split(r"([,;.\-\?\!\s+])", text)
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--duration_control",
         type=float,
-        default=1.0,
+        default=1.1,
         help="control the speed of the whole utterance, larger value for slower speaking rate",
     )
     args = parser.parse_args()

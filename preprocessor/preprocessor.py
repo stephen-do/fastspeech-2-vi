@@ -74,24 +74,22 @@ class Preprocessor:
                 tg_path = os.path.join(
                     self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
                 )
-                # print(tg_path)
-                # print("trace 0", tg_path)
+                #print("trace 0", tg_path)
                 if os.path.exists(tg_path):
                     #print("trace 1", tg_path)
                     ret = self.process_utterance(speaker, basename)
-                    # print(ret)
                     if ret is None:
                         continue
                     else:
                         info, pitch, energy, n = ret
                     out.append(info)
 
-                    if len(pitch) > 0:
-                        pitch_scaler.partial_fit(pitch.reshape((-1, 1)))
-                    if len(energy) > 0:
-                        energy_scaler.partial_fit(energy.reshape((-1, 1)))
+                if len(pitch) > 0:
+                    pitch_scaler.partial_fit(pitch.reshape((-1, 1)))
+                if len(energy) > 0:
+                    energy_scaler.partial_fit(energy.reshape((-1, 1)))
 
-                    n_frames += n
+                n_frames += n
 
         print("Computing statistic quantities ...")
         # Perform normalization if necessary
@@ -169,7 +167,6 @@ class Preprocessor:
             textgrid.get_tier_by_name("phones")
         )
         text = "{" + " ".join(phone) + "}"
-        # text = " ".join(phone)
         if start >= end:
             return None
 

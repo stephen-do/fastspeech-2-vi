@@ -133,3 +133,5 @@ evaluation/
 onnx/
 output*
 preprocessed*
+raw/
+.idea/
