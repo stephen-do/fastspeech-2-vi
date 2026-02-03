@@ -5,7 +5,7 @@ from utils.model import get_model
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=180000)
+    parser.add_argument("--restore_step", type=int, default=100000)
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Define input and output names
@@ -60,7 +60,7 @@ if __name__ == "__main__":
             None, None, None,  # p_targets, e_targets, d_targets
             p_control, e_control, d_control
         ),
-        f="./FastSpeech_2.onnx",
+        f="./FastSpeech_2_base.onnx",
         input_names=input_names,
         output_names=output_names,
         dynamic_axes=dynamic_axes,
